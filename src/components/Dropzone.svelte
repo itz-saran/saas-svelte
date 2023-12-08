@@ -71,15 +71,19 @@
 
 	async function uploadFile(fileToUpload: File) {
 		simulateLoading();
-		console.log("Starting upload");
 		const formData = new FormData();
 		formData.append("file", fileToUpload);
-		const response = await fetch("/api/files", {
-			method: "POST",
-			body: formData,
-		});
-		const data = await response.json();
-		console.log({ data });
+		try {
+			const response = await fetch("/api/files", {
+				method: "POST",
+				body: formData,
+			});
+			const data = await response.json();
+			console.log({ data });
+			uploadProgress = 100;
+		} catch (err) {
+			console.log("FILE_UPLOAD_ERROR", err);
+		}
 	}
 </script>
 

@@ -9,23 +9,28 @@ import { and, eq } from "drizzle-orm";
 
 type UploadResponseType = {
 	success: boolean;
-	error: UploadApiErrorResponse | null;
+	error?: UploadApiErrorResponse;
 	data?: UploadApiResponse;
 };
+
 async function upload(buffer: Buffer): Promise<UploadResponseType> {
+	// upload_stream uses node buffer to upload and return response
 	return new Promise((resolve, reject) => {
 		cloudinary.uploader
-			.upload_stream({ resource_type: "auto" }, (err, res) => {
+			.upload_stream({ resource_type: "auto", folder: "sparrow" }, (err, res) => {
 				if (err || !res) {
-					return reject({ success: false, error: err, data: null });
+					return reject({ success: false, error: err });
 				}
-				return resolve({ success: true, error: null, data: res });
+				return resolve({ success: true, data: res });
 			})
 			.end(buffer);
 	});
 }
 
 export async function POST({ request }) {
+	/**
+	 * Create array buffer from form data to create NodeBuffer and use cloudinary to upload
+	 */
 	const data = request.formData();
 	const file = (await data).get("file") as File;
 	if (!file) {
@@ -33,9 +38,13 @@ export async function POST({ request }) {
 	}
 	const arrayBuffer = await file.arrayBuffer();
 	const buffer = Buffer.from(arrayBuffer);
-	const response = await upload(buffer)
-	console.log("file data", response);
-	return json({ success: true });
+	try {
+		const response = await upload(buffer);
+		console.log("Response", response);
+		return json({ success: true, message: "File uploaded successfully" });
+	} catch (err) {
+		throw error(500, "Internal server error");
+	}
 }
 
 export async function DELETE({ request }) {
@@ -68,5 +77,5 @@ export async function DELETE({ request }) {
 		throw error(500, "Internal server error");
 	}
 
-	return json({ success: true, message: "File delted successfully" });
+	return json({ success: true, message: "File deleted successfully" });
 }
