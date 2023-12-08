@@ -31,7 +31,7 @@
 	<div class="w-full mt-24 flex justify-center">
 		<div class="flex flex-col items-center gap-2">
 			<Loader2 class="h-8 w-8 animate-spin text-zinc-800" />
-			<p>{error}</p>
+			<p>Error in setting up your account. Please log out and try again.</p>
 		</div>
 	</div>
 {/await}

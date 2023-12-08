@@ -37,7 +37,7 @@ async function insertUser(userId: string) {
 export async function load({ locals }) {
 	const userId = locals.session?.userId;
 	if (!userId) {
-		return redirect(302, "/sign-in");
+		throw redirect(302, "/sign-in");
 	}
 	return {
 		streamed: {

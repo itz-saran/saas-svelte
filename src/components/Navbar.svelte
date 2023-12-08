@@ -2,8 +2,9 @@
 	import MaxWidthWrapper from "$components/MaxWidthWrapper.svelte";
 	import { buttonVariants } from "$components/ui/button";
 	import { ArrowRight } from "lucide-svelte";
-	import UserButton from 'clerk-sveltekit/client/UserButton.svelte'
-	import SignedIn from 'clerk-sveltekit/client/SignedIn.svelte'
+	import UserButton from "clerk-sveltekit/client/UserButton.svelte";
+	import SignedIn from "clerk-sveltekit/client/SignedIn.svelte";
+	import SignedOut from "clerk-sveltekit/client/SignedOut.svelte";
 </script>
 
 <nav
@@ -27,26 +28,37 @@
 				>
 					Pricing
 				</a>
-				<a
-					href="/sign-in"
-					class={buttonVariants({
-						variant: "ghost",
-						size: "sm",
-					})}
-				>
-					Sign in
-				</a>
-				<a
-					href="/sign-up"
-					class={buttonVariants({
-						size: "sm",
-					})}
-				>
-					Get started
-					<ArrowRight class="ml-1.5 h-5 w-5" />
-				</a>
 
+				<SignedOut>
+					<a
+						href="/sign-in"
+						class={buttonVariants({
+							variant: "ghost",
+							size: "sm",
+						})}
+					>
+						Sign in
+					</a>
+					<a
+						href="/sign-up"
+						class={buttonVariants({
+							size: "sm",
+						})}
+					>
+						Get started
+						<ArrowRight class="ml-1.5 h-5 w-5" />
+					</a>
+				</SignedOut>
 				<SignedIn>
+					<a
+						href="/dashboard"
+						class={buttonVariants({
+							size: "sm",
+						})}
+					>
+						Dashboard
+						<ArrowRight class="ml-1.5 h-5 w-5" />
+					</a>
 					<UserButton afterSignOutUrl="/" />
 				</SignedIn>
 			</div>

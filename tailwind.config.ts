@@ -14,6 +14,9 @@ const config = {
 			},
 		},
 		extend: {
+			maxWidth: {
+				"8xl": "1408px",
+			},
 			colors: {
 				border: "hsl(var(--border) / <alpha-value>)",
 				input: "hsl(var(--input) / <alpha-value>)",
