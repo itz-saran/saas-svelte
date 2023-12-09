@@ -7,6 +7,8 @@
 	import { format } from "date-fns";
 	import Button from "$components/ui/button/button.svelte";
 	import { invalidate } from "$app/navigation";
+	import { toast } from "svelte-french-toast";
+
 	export let data: PageData;
 	let currentlyDeleting: string | null = null;
 
@@ -21,9 +23,11 @@
 				body: JSON.stringify({ fileId }),
 			});
 			const data = await response.json();
+			toast.success("File deleted successfully.");
 			// ? Invalidate the current file data so the page loads new data
 			invalidate("file-data");
 		} catch (error) {
+			toast.error("Something went wrong, please try again.");
 			console.log("DELETE_FILE_ERROR", error);
 		}
 
@@ -31,7 +35,7 @@
 	}
 </script>
 
-<main class="mx-auto max-w-7xl md:p-10 w-full">
+<main class="mx-auto max-w-7xl px-5 md:p-10 w-full">
 	<div
 		class="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0"
 	>
@@ -57,35 +61,40 @@
 								/>
 								<div class="flex-1 truncate">
 									<div class="flex items-center space-x-3">
-										<h3 class="truncate text-lg font-medium text-zinc-900">{file.name}</h3>
+										<h3 class="truncate text-lg font-medium text-zinc-900">
+											{file.name.replace("sparrow/", "").replace(/_at_.*/, "")}
+										</h3>
 									</div>
 								</div>
 							</div>
 						</a>
 						<div
-							class="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500"
+							class="px-6 py-3 mt-4 flex justify-between flex-col xs:flex-row gap-y-6 xs:gap-y-0 xs:place-items-center xs:py-2 text-xs text-zinc-500"
 						>
 							<div class="flex items-center gap-2">
-								<Plus class="h-4 w-4" />
-								{format(file.createdAt, "MMM yyyy")}
+								<Plus class="h-4 w-4 shrink-0" />
+								<span class="xs:whitespace-pre">{format(file.createdAt, "dd-MM-yyyy hh:mm")}</span>
 							</div>
-							<div class="flex items-center gap-2">
-								<MessageSquare class="h-4 w-4" />
-								mock
+							<div class="grow grid gap-y-6 xs:gap-y-0 xs:grid-cols-2 xs:place-items-center">
+								<div class="flex items-center gap-2">
+									<MessageSquare class="h-4 w-4" />
+									11
+								</div>
+								<Button
+									class="shrink-0"
+									disabled={currentlyDeleting === file.id}
+									on:click={() => {
+										deleteFile(file.id);
+									}}
+									variant="destructive"
+								>
+									{#if currentlyDeleting === file.id}
+										<Loader2 size={16} class="animate-spin" />
+									{:else}
+										<Trash size={16} class="w-full" />
+									{/if}
+								</Button>
 							</div>
-							<Button
-								disabled={currentlyDeleting === file.id}
-								on:click={() => {
-									deleteFile(file.id);
-								}}
-								variant="destructive"
-							>
-								{#if currentlyDeleting === file.id}
-									<Loader2 size={16} class="animate-spin" />
-								{:else}
-									<Trash size={16} class="w-full" />
-								{/if}
-							</Button>
 						</div>
 					</li>
 				{/each}

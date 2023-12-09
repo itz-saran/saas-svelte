@@ -1,47 +1,44 @@
 import { CLERK_SECRET_KEY } from "$env/static/private";
 import clerk from "$lib/clerk.server.js";
-import cloudinary from "$lib/cloudinary.server.js";
+import { deleteFile, uploadFile } from "$lib/cloudinary.server.js";
 import { db } from "$lib/db/index.server.js";
 import { file } from "$lib/db/schema.js";
+import type { DeleteResponseType } from "$lib/types.js";
 import { error, json } from "@sveltejs/kit";
-import type { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 import { and, eq } from "drizzle-orm";
 
-type UploadResponseType = {
-	success: boolean;
-	error?: UploadApiErrorResponse;
-	data?: UploadApiResponse;
-};
-
-async function upload(buffer: Buffer): Promise<UploadResponseType> {
-	// upload_stream uses node buffer to upload and return response
-	return new Promise((resolve, reject) => {
-		cloudinary.uploader
-			.upload_stream({ resource_type: "auto", folder: "sparrow" }, (err, res) => {
-				if (err || !res) {
-					return reject({ success: false, error: err });
-				}
-				return resolve({ success: true, data: res });
-			})
-			.end(buffer);
-	});
-}
-
 export async function POST({ request }) {
+	const authState = await clerk.authenticateRequest({ request, secretKey: CLERK_SECRET_KEY });
+	const user = authState.toAuth();
+	if (!authState.isSignedIn || !user?.userId) {
+		throw error(401, "Unauthorized");
+	}
 	/**
 	 * Create array buffer from form data to create NodeBuffer and use cloudinary to upload
 	 */
 	const data = request.formData();
-	const file = (await data).get("file") as File;
-	if (!file) {
+	const fileToUpload = (await data).get("file") as File;
+	if (!fileToUpload) {
 		throw error(400, "File is missing");
 	}
-	const arrayBuffer = await file.arrayBuffer();
+	const arrayBuffer = await fileToUpload.arrayBuffer();
 	const buffer = Buffer.from(arrayBuffer);
 	try {
-		const response = await upload(buffer);
-		console.log("Response", response);
-		return json({ success: true, message: "File uploaded successfully" });
+		const { data, success } = await uploadFile(buffer, `${fileToUpload.name}_at_${Date.now()}`);
+		if (!success || !data || !data.asset_id) {
+			throw error(500, "Internal server error");
+		}
+
+		// Add the file url to our database
+		await db.insert(file).values({
+			key: data.asset_id,
+			name: data.public_id,
+			url: data.secure_url,
+			uploadStatus: "PROCESSING",
+			userId: user.userId,
+		});
+
+		return json({ success: true, message: "File uploaded successfully", file: data });
 	} catch (err) {
 		throw error(500, "Internal server error");
 	}
@@ -72,7 +69,13 @@ export async function DELETE({ request }) {
 	}
 
 	try {
-		await db.delete(file).where(eq(file.id, fileInDb.id));
+		// ? First delete from cloudinary. If that is success, then clear from db
+		const cloudinaryDeleteStatus: DeleteResponseType = await deleteFile(fileInDb.name);
+		if (cloudinaryDeleteStatus.success && cloudinaryDeleteStatus.data) {
+			await db.delete(file).where(eq(file.id, fileInDb.id));
+		} else {
+			throw error(500, "Internal server error");
+		}
 	} catch (err) {
 		throw error(500, "Internal server error");
 	}

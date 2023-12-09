@@ -2,11 +2,12 @@
 	import { Progress as ProgressPrimitive } from "bits-ui";
 	import { cn } from "$lib/utils";
 
-	type $$Props = ProgressPrimitive.Props;
+	type $$Props = ProgressPrimitive.Props & {indicatorClass?: string};
 
 	let className: $$Props["class"] = undefined;
 	export let max: $$Props["max"] = 100;
 	export let value: $$Props["value"] = undefined;
+	export let indicatorClass: $$Props["indicatorClass"] = undefined;
 	export { className as class };
 </script>
 
@@ -18,7 +19,7 @@
 	{...$$restProps}
 >
 	<div
-		class="h-full w-full flex-1 bg-primary transition-all"
+		class={cn("h-full w-full flex-1 bg-primary transition-all", indicatorClass)}
 		style={`transform: translateX(-${
 			100 - (100 * (value ?? 0)) / (max ?? 1)
 		}%)`}

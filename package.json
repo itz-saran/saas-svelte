@@ -49,6 +49,7 @@
 		"drizzle-orm": "^0.29.1",
 		"lucide-svelte": "^0.294.0",
 		"postgres": "^3.4.3",
+		"svelte-french-toast": "^1.2.0",
 		"tailwind-merge": "^2.0.0",
 		"tailwind-variants": "^0.1.18"
 	}

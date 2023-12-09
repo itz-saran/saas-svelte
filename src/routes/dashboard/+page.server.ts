@@ -1,7 +1,7 @@
 import { db } from "$lib/db/index.server.js";
 import { file, user } from "$lib/db/schema.js";
 import { redirect } from "@sveltejs/kit";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export async function load({ locals, depends }) {
 	// ? Giving an identifier so that we can invalidate the data after delete API call
@@ -19,23 +19,6 @@ export async function load({ locals, depends }) {
 		throw redirect(302, "/user-setup");
 	}
 
-	// add mock files
-
-	// await db.insert(file).values([
-	// 	{
-	// 		name: "mock1",
-	// 		url: "/mock-1",
-	// 		key: "mock-1",
-	// 		userId: "user_2Z7Rksf1XHUAGylzTxwg5KIjhnU",
-	// 	},
-	// 	{
-	// 		name: "mock2",
-	// 		url: "/mock-2",
-	// 		key: "mock-2",
-	// 		userId: "user_2Z7Rksf1XHUAGylzTxwg5KIjhnU",
-	// 	},
-	// ]);
-
 	return {
 		user: dbUser,
 		streaming: {
@@ -44,6 +27,7 @@ export async function load({ locals, depends }) {
 				db.query.file
 					.findMany({
 						where: eq(file.userId, userId),
+						orderBy: desc(file.createdAt),
 					})
 					.then((files) => {
 						resolve(files);

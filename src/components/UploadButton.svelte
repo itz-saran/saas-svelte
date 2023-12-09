@@ -6,7 +6,7 @@
 </script>
 
 <Root
-	open={true}
+	open={isOpen}
 	onOpenChange={(visible) => {
 		if (!visible) {
 			isOpen = visible;

@@ -1,13 +1,16 @@
 <script lang="ts">
 	import type { EventHelper } from "$lib/types";
-	import { Cloud, File as FileIcon } from "lucide-svelte";
+	import { Cloud, File as FileIcon, Loader2 } from "lucide-svelte";
 	import Progress from "$components/ui/progress/progress.svelte";
+	import { toast } from "svelte-french-toast";
+	import type { UploadApiResponse } from "cloudinary";
+	import { goto, invalidate } from "$app/navigation";
 
 	type FileInputOnChangeEvent = EventHelper<Event, HTMLInputElement>;
 	type DragAndDropEvent = EventHelper<DragEvent, HTMLButtonElement>;
 
 	let file: File | null = null;
-	let isUploading = true;
+	let isUploading = false;
 	let uploadProgress = 0;
 
 	function handleDrop(e: DragAndDropEvent) {
@@ -69,20 +72,46 @@
 		}, 500);
 	}
 
+	type UploadFileResponse = {
+		success: boolean;
+		message: string;
+		file: UploadApiResponse;
+	};
+
 	async function uploadFile(fileToUpload: File) {
+		// Check the extenstion of the file
+		const extension = fileToUpload.name.split(".");
+		if (extension[extension.length - 1] !== "pdf") {
+			toast.error("Only pdf files are allowed to upload.");
+			file = null;
+			return;
+		}
+
+		isUploading = true;
 		simulateLoading();
 		const formData = new FormData();
 		formData.append("file", fileToUpload);
+
 		try {
 			const response = await fetch("/api/files", {
 				method: "POST",
 				body: formData,
 			});
-			const data = await response.json();
-			console.log({ data });
-			uploadProgress = 100;
+			const data: UploadFileResponse = await response.json();
+			if (!data.file.asset_id) {
+				toast.error("Something went, wrong try again.");
+				uploadProgress = 0;
+				isUploading = false;
+				return;
+			}
+			if (data.success && data.file) {
+				toast.success("File uploaded successfully.");
+				uploadProgress = 100;
+				await goto(`/dashboard/${data.file.asset_id}`);
+			}
 		} catch (err) {
 			console.log("FILE_UPLOAD_ERROR", err);
+			toast.error("Something went wrong, please try again.");
 		}
 	}
 </script>
@@ -107,6 +136,7 @@
 			<input
 				id="dropzone-file"
 				type="file"
+				multiple={false}
 				on:change={handleFileChange}
 				accept="application/pdf"
 				class="hidden"
@@ -126,7 +156,21 @@
 
 			{#if isUploading}
 				<div class="w-full mt-4 max-w-xs mx-auto">
-					<Progress value={uploadProgress} class="h-1 w-full bg-zinc-200" />
+					<Progress
+						value={uploadProgress}
+						class="h-1 w-full bg-zinc-200"
+						indicatorClass={uploadProgress === 100 ? "bg-green-500" : ""}
+					/>
+				</div>
+			{/if}
+			{#if uploadProgress === 100}
+				<div class="w-full mt-4 max-w-xs mx-auto">
+					<div
+						class="flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2"
+					>
+						<Loader2 class="h-3 w-3 animate-spin" />
+						redirecting...
+					</div>
 				</div>
 			{/if}
 		</label>

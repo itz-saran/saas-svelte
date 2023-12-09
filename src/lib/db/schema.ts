@@ -15,7 +15,7 @@ export const user = pgTable("users", {
 	stripeCustomerId: text("stripe_customer_id").unique(),
 	stripeSubscriptionId: text("stripe_subscription_id").unique(),
 	stripePriceId: text("stripe_price_id"),
-	stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+	stripeCurrentPeriodEnd: timestamp("stripe_current_period_end", { withTimezone: true }),
 });
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -28,9 +28,9 @@ export const file = pgTable("files", {
 	name: text("name").notNull(),
 	uploadStatus: UPLOAD_STATUS("upload_status").default("PENDING").notNull(),
 	url: text("url").notNull(),
-	key: text("string").notNull(),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	key: text("string").unique().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 	userId: text("user_id").notNull(),
 });
 
