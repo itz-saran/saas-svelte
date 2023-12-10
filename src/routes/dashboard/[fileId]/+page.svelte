@@ -10,11 +10,10 @@
 		<!-- Left side -->
 		<div class="flex-1 xl:flex">
 			<div class="px-4 py-6 sm:px-6 lg:pl-8 xl:flex-1 xl:pl-6">
-				<PDFRenderer />
+				<!-- PDF rendered -->
+				<PDFRenderer file={data.file} />
 			</div>
 		</div>
-
-		<!-- Chat -->
 		<div class="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
 			<ChatWrapper />
 		</div>

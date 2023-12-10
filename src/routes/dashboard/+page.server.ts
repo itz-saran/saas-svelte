@@ -1,5 +1,6 @@
 import { db } from "$lib/db/index.server.js";
 import { file, user } from "$lib/db/schema.js";
+import type { File } from "$lib/types.js";
 import { redirect } from "@sveltejs/kit";
 import { desc, eq } from "drizzle-orm";
 
@@ -23,7 +24,7 @@ export async function load({ locals, depends }) {
 		user: dbUser,
 		streaming: {
 			// ? Only authencticated and synced users can access their files
-			files: new Promise<(typeof file.$inferSelect)[]>((resolve) => {
+			files: new Promise<File[]>((resolve) => {
 				db.query.file
 					.findMany({
 						where: eq(file.userId, userId),

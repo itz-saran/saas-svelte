@@ -8,6 +8,7 @@
 	import Button from "$components/ui/button/button.svelte";
 	import { invalidate } from "$app/navigation";
 	import { toast } from "svelte-french-toast";
+	import { extractFileNameCloudinary } from "$lib/utils";
 
 	export let data: PageData;
 	let currentlyDeleting: string | null = null;
@@ -54,7 +55,7 @@
 					<li
 						class="colspan-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg"
 					>
-						<a href={`/dashboard/${file.id}`} class="flex flex-col gap-2">
+						<a href={`/dashboard/${file.key}`} class="flex flex-col gap-2">
 							<div class="pt-6 px-6 flex w-full items-center justify-between space-x-6">
 								<div
 									class="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
@@ -62,7 +63,7 @@
 								<div class="flex-1 truncate">
 									<div class="flex items-center space-x-3">
 										<h3 class="truncate text-lg font-medium text-zinc-900">
-											{file.name.replace("sparrow/", "").replace(/_at_.*/, "")}
+											{extractFileNameCloudinary(file.name)}
 										</h3>
 									</div>
 								</div>

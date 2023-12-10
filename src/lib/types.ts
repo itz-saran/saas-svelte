@@ -1,3 +1,4 @@
+import type { file } from "$lib/db/schema";
 import type { User } from "@clerk/clerk-sdk-node/esm/instance";
 import type { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 
@@ -18,3 +19,5 @@ export type DeleteResponseType = {
 	error?: string;
 	data?: string;
 };
+
+export type File = typeof file.$inferSelect;

@@ -54,3 +54,6 @@ export const flyAndScale = (
 		easing: cubicOut,
 	};
 };
+
+export const extractFileNameCloudinary = (name: string) =>
+	name.replace("sparrow/", "").replace(/_at_.*/, "");
