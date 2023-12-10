@@ -13,9 +13,9 @@ export const load = (async ({ params, locals }) => {
 		where: and(eq(file.key, params.fileId)),
 	});
 
-    if(!dbFile) {
-        throw error(404, "Not found")
-    }
+	if (!dbFile) {
+		throw error(404, "Not found");
+	}
 
 	return {
 		file: dbFile,

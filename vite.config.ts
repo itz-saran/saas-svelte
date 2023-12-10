@@ -5,5 +5,5 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	css: {
 		devSourcemap: true,
-	}
+	},
 });

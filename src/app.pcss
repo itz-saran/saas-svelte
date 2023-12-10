@@ -87,6 +87,25 @@ html {
 	border-radius: 7px;
 }
 
+.scrollbar-custom::-webkit-scrollbar {
+	width: 0.3rem;
+	height: 0.3rem;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+	--bg-opacity: 0.5;
+	background-color: #00000015;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+	--bg-opacity: 0.5;
+	background-color: hsla(0, 0%, 7%, 0.75);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+	border-radius: 7px;
+}
+
 button:disabled {
 	cursor: not-allowed;
 }

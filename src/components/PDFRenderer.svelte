@@ -1,112 +1,52 @@
 <script lang="ts">
-	import type { File } from "$lib/types";
-	import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-svelte";
 	import type { PDFDocumentProxy } from "pdfjs-dist";
-	import * as pdfjs from "pdfjs-dist";
-	import toast from "svelte-french-toast";
-	//@ts-ignore
-	import pdfjsWorker from "pdfjs-dist/build/pdf.worker.js";
+	import { ChevronDown, ChevronUp, Expand, Loader2, RotateCw, Search } from "lucide-svelte";
 	import Button from "$components/ui/button/button.svelte";
 	import { Input } from "$components/ui/input";
-	import { Root, Trigger, Content, Item } from "$components/ui/dropdown-menu";
+	import * as Dropdown from "$components/ui/dropdown-menu";
+	import * as Dialog from "$components/ui/dialog";
+	import PDFCanvas from "$components/PDFCanvas.svelte";
+	import { extractFileNameCloudinary } from "$lib/utils";
 
-	pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+	export let url: string;
+	export let name: string;
 
-	export let file: File;
-	let pdfDoc: PDFDocumentProxy | null = null;
-	let pageNumber = 1;
 	let totalPages: number | null = null;
-	let pagePending = false;
-	let isPageRendering = false;
-	let scale = 2;
-	let canvasElement: HTMLCanvasElement;
-	// Get the document load function ready
-	const loadingTask = pdfjs.getDocument(file.url).promise;
-
-	$: if (canvasElement && totalPages && pageNumber > 0 && pageNumber < totalPages) {
-		loadPDF(canvasElement, { pageNumber, scale });
-	}
+	let pageNumber = 1;
+	let scale = 1;
+	let rotation: number = 0;
+	let isOpen = false;
 
 	const minScale = 1.0;
 	const maxScale = 3;
-
-	function debounce(this: any, func: any, timeout = 300) {
-		let timer: NodeJS.Timeout;
-		return (...args: any) => {
-			clearTimeout(timer);
-			timer = setTimeout(() => {
-				func.apply(this, args);
-			}, timeout);
-		};
-	}
 
 	function handleChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		if (target.value === "") return;
 		const value = parseInt(target.value.replace(/\D/g, ""));
-		if (!isNaN(value)) {
+		if (!isNaN(value) && value > 0) {
 			pageNumber = value;
 		}
 	}
 
-	async function asyncLoad(
-		node: HTMLCanvasElement,
-		{ pageNumber = 1, scale = minScale }: { pageNumber?: number; scale?: number },
-	) {
-		// Resolve document from loadingTask and render page in canvas
-		pdfDoc = await loadingTask;
-		totalPages = pdfDoc.numPages;
-		const page = await pdfDoc.getPage(pageNumber);
-		const viewport = page.getViewport({ scale: scale <= maxScale ? scale : maxScale });
-		const canvas = node;
-		const context = canvas.getContext("2d");
-		//
-		let outputScale = window.devicePixelRatio || 1;
-
-		canvas.width = Math.floor(viewport.width * outputScale);
-		canvas.height = Math.floor(viewport.height * outputScale);
-
-		// canvas.style.width = Math.floor(viewport.width) + "px";
-		// canvas.style.height = Math.floor(viewport.height) + "px";
-
-		// const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined;
-		// canvas.height = viewport.height;
-		// canvas.width = viewport.width;
-		//
-		const renderContext = {
-			canvasContext: context!,
-			viewport: viewport,
-			transform: [3, 0, 0, 3, 0, 0],
-		};
-
-		page.render(renderContext);
-		return true;
-	}
-
-	function loadPDF(
-		node: HTMLCanvasElement,
-		{ pageNumber = 1, scale = minScale }: { pageNumber?: number; scale?: number },
-	) {
-		if (isPageRendering) {
+	function zoom(newScale: number) {
+		if (newScale > maxScale) {
+			scale = maxScale;
 			return;
 		}
-		isPageRendering = true;
-		asyncLoad(node, { pageNumber, scale })
-			.catch(() => {
-				toast.error("Error in loading pdf");
-			})
-			.finally(() => {
-				isPageRendering = false;
-			});
+		if (newScale < minScale) {
+			scale = minScale;
+			return;
+		}
+		scale = newScale;
+	}
+
+	function onPDFLoad(pdf: PDFDocumentProxy | null) {
+		if (pdf) {
+			totalPages = pdf.numPages;
+		}
 	}
 </script>
-
-<svelte:window
-	on:resize={debounce(() => {
-		if (!canvasElement) return;
-		loadPDF(canvasElement, { scale });
-	}, 500)}
-/>
 
 <div class="w-full bg-white rounded-md shadow flex flex-col items-center">
 	<div class="h-14 w-full border-b border-zinc-200 flex items-center justify-between px-2">
@@ -147,30 +87,97 @@
 			</Button>
 		</div>
 		<div class="space-x-2">
-			<Root>
-				<Trigger>
+			<Dropdown.Root>
+				<Dropdown.Trigger>
 					<Button class="gap-1.5" aria-label="zoom" variant="ghost">
 						<Search class="h-4 w-4" />
-						<span>{(scale - 0.8) * 100}%</span>
+						<span>{scale * 100}%</span>
 						<ChevronDown class="h-3 w-3 opacity-50" />
 					</Button>
-				</Trigger>
-				<Content>
-					<Item>125%</Item>
-				</Content>
-			</Root>
+				</Dropdown.Trigger>
+				<Dropdown.Content>
+					<Dropdown.Item
+						on:click={() => {
+							zoom(1);
+						}}
+					>
+						100%
+					</Dropdown.Item>
+					<Dropdown.Item
+						on:click={() => {
+							scale = 1.5;
+						}}
+					>
+						150%
+					</Dropdown.Item>
+					<Dropdown.Item
+						on:click={() => {
+							scale = 2;
+						}}
+					>
+						200%
+					</Dropdown.Item>
+					<Dropdown.Item
+						on:click={() => {
+							scale = 2.5;
+						}}
+					>
+						250%
+					</Dropdown.Item>
+				</Dropdown.Content>
+			</Dropdown.Root>
+			<Button
+				variant="ghost"
+				on:click={() => {
+					rotation += 90;
+				}}
+			>
+				<RotateCw class="h-4 w-4" />
+			</Button>
+			<Dialog.Root
+				open={isOpen}
+				onOpenChange={(visible) => {
+					if (!visible) {
+						isOpen = visible;
+					}
+				}}
+			>
+				<Dialog.Trigger
+					on:click={() => {
+						isOpen = true;
+					}}
+				>
+					<Button variant="ghost" class="gap-1.5" aria-label="fullscreen">
+						<Expand class="h-4 w-4" />
+					</Button>
+				</Dialog.Trigger>
+				<Dialog.Content class="max-w-[95%] p-0 gap-0">
+					<Dialog.Header>
+						<Dialog.Title class="text-center py-5 border-b border-zinc-300"
+							>{extractFileNameCloudinary(name)}</Dialog.Title
+						>
+					</Dialog.Header>
+					<div
+						class="w-full bg-white relative grid place-items-center overflow-auto h-[calc(100vh-5rem)] scrollbar-custom"
+					>
+						<PDFCanvas
+							{minScale}
+							{maxScale}
+							{url}
+							{scale}
+							{rotation}
+							{pageNumber}
+							{onPDFLoad}
+							multiple={true}
+						/>
+					</div>
+				</Dialog.Content>
+			</Dialog.Root>
 		</div>
 	</div>
-	<div class="flex-1 w-full max-h-screen overflow-auto">
-		{#if isPageRendering}
-			<div class="flex justify-center">
-				<Loader2 class="my-24 h-6 w-6 animate-spin" />
-			</div>
-		{/if}
-		<canvas
-			bind:this={canvasElement}
-			class="h-full w-full bg-white"
-			use:loadPDF={{ scale, pageNumber }}
-		/>
+	<div
+		class="grow-0 w-full bg-white relative grid place-items-center overflow-auto h-[calc(100vh-10rem)] scrollbar-custom"
+	>
+		<PDFCanvas {minScale} {maxScale} {url} {scale} {rotation} {pageNumber} {onPDFLoad} />
 	</div>
 </div>

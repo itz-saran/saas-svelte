@@ -15,7 +15,7 @@ const config = {
 		},
 		extend: {
 			screens: {
-				"xs": "375px",
+				xs: "375px",
 			},
 			maxWidth: {
 				"8xl": "1408px",
