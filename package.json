@@ -10,7 +10,9 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"migrate": "drizzle-kit generate:pg",
+		"generate": "drizzle-kit generate:pg",
+		"migrate": "ts-node --esm src/lib/db/migrate.ts",
+		"push": "drizzle-kit push:pg",
 		"studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
@@ -46,12 +48,14 @@
 		"cloudinary": "^1.41.0",
 		"clsx": "^2.0.0",
 		"date-fns": "^2.30.0",
+		"dotenv": "^16.3.1",
 		"drizzle-orm": "^0.29.1",
 		"lucide-svelte": "^0.294.0",
 		"pdfjs-dist": "3.11.174",
 		"postgres": "^3.4.3",
 		"svelte-french-toast": "^1.2.0",
 		"tailwind-merge": "^2.0.0",
-		"tailwind-variants": "^0.1.18"
+		"tailwind-variants": "^0.1.18",
+		"zod": "3.21.4"
 	}
 }

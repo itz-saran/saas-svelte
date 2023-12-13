@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 export default {
 	out: "./drizzle",
 	schema: "./src/lib/db/schema.ts",
