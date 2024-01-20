@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PDFDocumentProxy, PageViewport, PDFPageProxy } from "pdfjs-dist";
 	import toast from "svelte-french-toast";
+	import { Loader2 } from "lucide-svelte";
+	import pdfjs from "$lib/pdfjs.lib";
 
 	export let url: string;
 	export let scale: number;
@@ -15,13 +17,6 @@
 	let isPageRendering: boolean = false;
 	let _totalPages: number | null = null;
 	let pdfDoc: PDFDocumentProxy | null = null;
-
-	import * as pdfjs from "pdfjs-dist";
-	//@ts-ignore
-	import pdfjsWorker from "pdfjs-dist/build/pdf.worker.js";
-	import { Loader2 } from "lucide-svelte";
-
-	pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 	let canvasElement: HTMLCanvasElement | null;
 	// ? for multiple mode

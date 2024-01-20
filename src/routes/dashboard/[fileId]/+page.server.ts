@@ -4,7 +4,8 @@ import { db } from "$lib/db/index.server";
 import { eq, and } from "drizzle-orm";
 import { file } from "$lib/db/schema";
 
-export const load = (async ({ params, locals }) => {
+export const load = (async ({ params, locals, depends }) => {
+	depends("individual-file");
 	const userId = locals.session?.userId;
 	if (!userId) {
 		throw redirect(302, "/sign-in");

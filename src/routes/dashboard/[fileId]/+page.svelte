@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import PDFRenderer from "$components/PDFRenderer.svelte";
-	import ChatWrapper from "$components/ChatWrapper.svelte";
+	import ChatWrapper from "$components/chat/ChatWrapper.svelte";
 	export let data: PageData;
 </script>
 
@@ -16,7 +16,7 @@
 		</div>
 		<!-- Chat -->
 		<div class="shrink-0 lg:w-[40%] border-t border-gray-200 lg:border-l lg:border-t-0">
-			<ChatWrapper />
+			<ChatWrapper file={data.file} />
 		</div>
 	</div>
 </div>

@@ -23,10 +23,10 @@
 				},
 				body: JSON.stringify({ fileId }),
 			});
-			const data = await response.json();
+			// const data = await response.json();
 			toast.success("File deleted successfully.");
 			// ? Invalidate the current file data so the page loads new data
-			invalidate("file-data");
+			invalidate("file-list-data");
 		} catch (error) {
 			toast.error("Something went wrong, please try again.");
 			console.log("DELETE_FILE_ERROR", error);

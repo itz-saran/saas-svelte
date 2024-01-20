@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 // ? Declaring enums at top so it gets generated at first before tables
 export const UPLOAD_STATUS = pgEnum("upload_status", [
@@ -21,6 +21,8 @@ export const user = pgTable("users", {
 export const userRelations = relations(user, ({ many }) => ({
 	// ? One user may upload many files
 	files: many(file),
+	// ? One user may have many messages
+	messages: many(message),
 }));
 
 export const file = pgTable("files", {
@@ -34,10 +36,35 @@ export const file = pgTable("files", {
 	userId: text("user_id").notNull(),
 });
 
-export const fileRelations = relations(file, ({ one }) => ({
+export const fileRelations = relations(file, ({ one, many }) => ({
 	// ? Many files have one author
 	user: one(user, {
 		fields: [file.userId],
 		references: [user.id],
+	}),
+	// ? One file may have many messages
+	messages: many(message),
+}));
+
+export const message = pgTable("messages", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	text: text("text").notNull(),
+	isUserMessage: boolean("is_user_message"),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+	fileId: text("file_id").notNull(),
+	userId: text("user_id").notNull(),
+});
+
+export const messageRelations = relations(message, ({ one }) => ({
+	// ? Message has one user and file
+	user: one(user, {
+		fields: [message.userId],
+		references: [user.id],
+	}),
+
+	file: one(file, {
+		fields: [message.fileId],
+		references: [file.key],
 	}),
 }));

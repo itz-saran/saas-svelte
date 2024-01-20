@@ -6,7 +6,7 @@ import { desc, eq } from "drizzle-orm";
 
 export async function load({ locals, depends }) {
 	// ? Giving an identifier so that we can invalidate the data after delete API call
-	depends("file-data");
+	depends("file-list-data");
 	const userId = locals.session?.userId;
 	if (!userId) {
 		throw redirect(302, "/sign-in");

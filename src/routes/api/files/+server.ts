@@ -2,10 +2,13 @@ import { CLERK_SECRET_KEY } from "$env/static/private";
 import clerk from "$lib/clerk.server.js";
 import { deleteFile, uploadFile } from "$lib/cloudinary.server.js";
 import { db } from "$lib/db/index.server.js";
+import { deletePDFExtract } from "$lib/db/mongo.server.js";
 import { file } from "$lib/db/schema.js";
+import { indexPDF } from "$lib/pdfUtils.server.js";
 import type { DeleteResponseType } from "$lib/types.js";
 import { error, json } from "@sveltejs/kit";
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 
 export async function POST({ request }) {
 	const authState = await clerk.authenticateRequest({ request, secretKey: CLERK_SECRET_KEY });
@@ -38,11 +41,21 @@ export async function POST({ request }) {
 			userId: user.userId,
 		});
 
+		indexPDF({
+			fileUrl: data.secure_url,
+			id: data.asset_id,
+			userId: user.userId,
+		});
+
 		return json({ success: true, message: "File uploaded successfully", file: data });
 	} catch (err) {
 		throw error(500, "Internal server error");
 	}
 }
+
+const deleteRequestBodySchema = z.object({
+	fileId: z.string(),
+});
 
 export async function DELETE({ request }) {
 	const authState = await clerk.authenticateRequest({
@@ -50,11 +63,17 @@ export async function DELETE({ request }) {
 		request,
 	});
 
-	const { fileId } = (await request.json()) as { fileId: string };
-
 	if (!authState.isSignedIn) {
 		throw error(401, "Unauthorized");
 	}
+	const body = await request.json();
+	const result = deleteRequestBodySchema.safeParse(body);
+
+	if (!result.success) {
+		throw error(400, "File id not provided");
+	}
+
+	const { fileId } = result.data;
 
 	const { userId } = authState.toAuth();
 
@@ -73,10 +92,17 @@ export async function DELETE({ request }) {
 		const cloudinaryDeleteStatus: DeleteResponseType = await deleteFile(fileInDb.name);
 		if (cloudinaryDeleteStatus.success && cloudinaryDeleteStatus.data) {
 			await db.delete(file).where(eq(file.id, fileInDb.id));
+			await deletePDFExtract({
+				fileId: fileInDb.key,
+				userId,
+			}).catch((e) => {
+				console.log("mongo delete error", e);
+			});
 		} else {
 			throw error(500, "Internal server error");
 		}
 	} catch (err) {
+		console.log("FILE DELETE ERROR", err);
 		throw error(500, "Internal server error");
 	}
 
