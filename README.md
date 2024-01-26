@@ -1,7 +1,7 @@
 # SAAS full stack application using svelte and Sveltekit
 
 ### Note
-- This project is no longer under development. Originally this project is started to learn about sveltekit and it's API's. The project is from youtube channel named Josh tried coding and here is the [link](https://www.youtube.com/watch?v=ucX2zXAZ1I0) to the video, but in Sveltekit instead of NextJS.
+- This project is no longer under development. Originally this project is started to learn about sveltekit and it's API's. The project is from youtube channel named Josh tried coding and here is the <a href="https://www.youtube.com/watch?v=ucX2zXAZ1I0" target="_blank">link</a> to the video, but in Sveltekit instead of NextJS.
 - Since there is no free credit with chat GPT, The project can't be proceeded further and other alternative like hugging face was not giving expected result. Also as previously said this project was to just utilize the API's of sveltekit as a part of learning. So the development was stopped. 
 - In the video he will be using NextJS, Kinde Auth, Pinecone and chatGPT as libraries, but this project will use different dependecies instead of the ones used in video.
 - The project may not follow best practices since it's a project to learn svelte and sveltekit for the first time.
