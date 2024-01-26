@@ -31,7 +31,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y-autofocus -->
 <textarea
 	use:autoResize={autoresize}
 	class={cn(
@@ -41,7 +40,6 @@
 			"min-h-[80px]": !autoresize,
 		},
 	)}
-	autofocus
 	bind:value
 	on:blur
 	on:change

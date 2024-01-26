@@ -4,7 +4,6 @@ import { deleteFile, uploadFile } from "$lib/cloudinary.server.js";
 import { db } from "$lib/db/index.server.js";
 import { deletePDFExtract } from "$lib/db/mongo.server.js";
 import { file } from "$lib/db/schema.js";
-import { indexPDF } from "$lib/pdfUtils.server.js";
 import type { DeleteResponseType } from "$lib/types.js";
 import { error, json } from "@sveltejs/kit";
 import { and, eq } from "drizzle-orm";
@@ -38,12 +37,6 @@ export async function POST({ request }) {
 			name: data.public_id,
 			url: data.secure_url,
 			uploadStatus: "PROCESSING",
-			userId: user.userId,
-		});
-
-		indexPDF({
-			fileUrl: data.secure_url,
-			id: data.asset_id,
 			userId: user.userId,
 		});
 
@@ -95,8 +88,6 @@ export async function DELETE({ request }) {
 			await deletePDFExtract({
 				fileId: fileInDb.key,
 				userId,
-			}).catch((e) => {
-				console.log("mongo delete error", e);
 			});
 		} else {
 			throw error(500, "Internal server error");

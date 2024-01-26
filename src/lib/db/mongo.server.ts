@@ -30,7 +30,6 @@ export async function deletePDFExtract({ fileId, userId }: { fileId: string; use
 		userId,
 	};
 	const result = await extracts.deleteOne(query);
-	console.log({ count: result.deletedCount });
 	if (result.acknowledged) return true;
 	return false;
 }

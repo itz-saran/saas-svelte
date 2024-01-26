@@ -10,6 +10,7 @@ export const load = (async ({ params, locals, depends }) => {
 	if (!userId) {
 		throw redirect(302, "/sign-in");
 	}
+
 	const dbFile = await db.query.file.findFirst({
 		where: and(eq(file.key, params.fileId)),
 	});

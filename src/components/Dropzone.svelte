@@ -110,7 +110,6 @@
 				await goto(`/dashboard/${data.file.asset_id}`);
 			}
 		} catch (err) {
-			console.log("FILE_UPLOAD_ERROR", err);
 			toast.error("Something went wrong, please try again.");
 		}
 	}

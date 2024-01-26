@@ -7,25 +7,10 @@
 
 	export let file: File;
 
-	let isLoading = !(file.uploadStatus === "FAILED" || file.uploadStatus === "SUCCESS");
+	$: isLoading = !(file.uploadStatus === "FAILED" || file.uploadStatus === "SUCCESS");
 </script>
 
-{#if isLoading}
-	<div
-		class="relative min-h-[calc(100vh-3.5rem)] lg:min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"
-	>
-		<div class="flex-1 flex justify-center items-center flex-col mb-28">
-			<div class="flex flex-col items-center gap-2">
-				<Loader2 class="h-8 w-8 text-blue-500 animate-spin" />
-				<h3 class="font-semibold text-xl">Loading...</h3>
-				<p class="text-sm text-zinc-500">We're preparing your pdf.</p>
-			</div>
-		</div>
-		<ChatInput isDisabled />
-	</div>
-{/if}
-
-{#if file.uploadStatus === "PROCESSING" && !isLoading}
+{#if file.uploadStatus === "PROCESSING"}
 	<div
 		class="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"
 	>
@@ -40,7 +25,7 @@
 	</div>
 {/if}
 
-{#if file.uploadStatus === "FAILED" && !isLoading}
+{#if file.uploadStatus === "FAILED"}
 	<div
 		class="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"
 	>
@@ -66,6 +51,21 @@
 	</div>
 {/if}
 
+{#if isLoading}
+	<div
+		class="relative min-h-[calc(100vh-3.5rem)] lg:min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"
+	>
+		<div class="flex-1 flex justify-center items-center flex-col mb-28">
+			<div class="flex flex-col items-center gap-2">
+				<Loader2 class="h-8 w-8 text-blue-500 animate-spin" />
+				<h3 class="font-semibold text-xl">Loading...</h3>
+				<p class="text-sm text-zinc-500">We're preparing your pdf.</p>
+			</div>
+		</div>
+		<ChatInput isDisabled />
+	</div>
+{/if}
+
 {#if file.uploadStatus === "SUCCESS" && !isLoading}
 	<div
 		class="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"
@@ -73,8 +73,6 @@
 		<div class="flex-1 justify-between flex flex-col mb-28">
 			<Messages />
 		</div>
-		<ChatInput
-			
-		/>
+		<ChatInput fileId={file.id} />
 	</div>
 {/if}

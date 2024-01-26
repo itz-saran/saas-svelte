@@ -29,7 +29,6 @@
 			invalidate("file-list-data");
 		} catch (error) {
 			toast.error("Something went wrong, please try again.");
-			console.log("DELETE_FILE_ERROR", error);
 		}
 
 		currentlyDeleting = null;

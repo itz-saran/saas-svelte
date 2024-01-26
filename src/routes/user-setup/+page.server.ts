@@ -29,7 +29,6 @@ async function insertUser(userId: string) {
 		}
 		return true;
 	} catch (error) {
-		console.log("USER_SETUP_ERROR", error);
 		return false;
 	}
 }
